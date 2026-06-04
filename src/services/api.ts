@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 import { getToken, removeToken } from '../storage/authStorage';
 
@@ -16,7 +16,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(
-  async (config) => {
+  async (config: InternalAxiosRequestConfig) => {
     const token = await getToken();
 
     if (token) {
@@ -25,7 +25,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
@@ -34,8 +34,19 @@ api.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error) => {
-    if (error.code === 'ECONNABORTED' || !error.response) {
+  async (error: AxiosError<any>) => {
+    console.log('ERRO AXIOS:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject(new Error('Sem conexão, tente novamente.'));
+    }
+
+    if (!error.response) {
       return Promise.reject(new Error('Sem conexão, tente novamente.'));
     }
 
@@ -59,6 +70,9 @@ api.interceptors.response.use(
       return Promise.reject(new Error('Erro no servidor, tente novamente.'));
     }
 
-    return Promise.reject(error);
+    const apiMessage =
+      error.response.data?.message || 'Não foi possível realizar a operação.';
+
+    return Promise.reject(new Error(apiMessage));
   }
 );

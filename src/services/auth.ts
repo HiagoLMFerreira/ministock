@@ -16,10 +16,19 @@ export async function login(
   username: string,
   password: string
 ): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>('/auth/login', {
-    username,
-    password,
-  });
+  const { data } = await api.post<LoginResponse>(
+    '/auth/login',
+    {
+      username,
+      password,
+      expiresInMins: 30,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   return data;
 }
