@@ -12,10 +12,20 @@ import { Product } from '../services/products';
 
 export type RootStackParamList = {
   Login: undefined;
-  ProductList: undefined;
+
+  ProductList:
+    | {
+        createdProduct?: Product;
+        updatedProduct?: Product;
+        deletedProductId?: number;
+      }
+    | undefined;
+
   ProductDetail: {
     productId: number;
+    product?: Product;
   };
+
   ProductForm:
     | {
         product?: Product;
@@ -54,7 +64,7 @@ export function AppNavigator() {
             <Stack.Screen
               name="ProductList"
               component={ProductListScreen}
-              options={{ title: 'MiniStock' }}
+              options={{ headerShown: false }}
             />
 
             <Stack.Screen

@@ -17,6 +17,12 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    const isLoginRoute = config.url?.includes('/auth/login');
+
+    if (isLoginRoute) {
+      return config;
+    }
+
     const token = await getToken();
 
     if (token) {
